@@ -1,3 +1,6 @@
+from negotiation.concession import calculate_concession
+
+
 class NegotiationAgent:
 
     def __init__(self, user_requirements, provider_offer):
@@ -13,8 +16,9 @@ class NegotiationAgent:
             user_value = self.user[attribute]
             provider_value = self.provider[attribute]
 
-            final_offer[attribute] = (
-                user_value + provider_value
-            ) / 2
+            final_offer[attribute] = calculate_concession(
+                user_value,
+                provider_value
+            )
 
         return final_offer
