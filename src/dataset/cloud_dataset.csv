@@ -1,0 +1,22 @@
+Provider,Service,Category,Cost,Availability,Reliability,Security,Scalability,Response_Time,Throughput,Support_Quality
+AWS,EC2,Compute,8.5,99.99,9.8,10,10,120,950,9
+AWS,S3,Storage,7.5,99.99,9.9,10,10,80,980,9
+AWS,Lambda,Serverless,6.5,99.95,9.7,10,10,60,970,9
+AWS,RDS,Database,8.2,99.95,9.8,10,9,100,900,9
+AWS,EKS,Containers,8.8,99.95,9.7,10,10,115,930,8
+AWS,CloudFront,Networking,7,99.99,9.8,10,10,45,990,9
+AWS,DynamoDB,Database,7.8,99.99,9.9,10,10,75,960,9
+Azure,Virtual Machines,Compute,8,99.95,9.6,9,9,130,910,9
+Azure,Blob Storage,Storage,7,99.99,9.7,9,10,90,940,9
+Azure,Functions,Serverless,6.8,99.95,9.5,9,10,70,930,8
+Azure,Azure SQL,Database,8.1,99.95,9.6,9,9,110,900,9
+Azure,AKS,Containers,8.4,99.95,9.6,9,10,120,920,8
+Azure,Cosmos DB,Database,7.9,99.99,9.8,9,10,85,955,9
+Azure,CDN,Networking,6.9,99.99,9.7,9,10,50,975,8
+GCP,Compute Engine,Compute,7.8,99.95,9.7,9,10,110,980,8
+GCP,Cloud Storage,Storage,6.9,99.99,9.8,9,10,85,990,8
+GCP,Cloud Functions,Serverless,6.4,99.95,9.6,9,10,65,975,8
+GCP,Cloud SQL,Database,7.7,99.95,9.7,9,9,95,930,8
+GCP,GKE,Containers,8.2,99.95,9.8,9,10,105,950,8
+GCP,BigQuery,Analytics,8.3,99.99,9.9,9,10,90,1000,8
+GCP,Cloud CDN,Networking,6.8,99.99,9.8,9,10,48,985,8
