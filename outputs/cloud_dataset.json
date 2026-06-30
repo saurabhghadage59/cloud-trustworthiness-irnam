@@ -1,0 +1,167 @@
+[
+  {
+    "auto_scaling": true,
+    "availability_sla_percent": 99.99,
+    "availability_zone_count": 123,
+    "backup": true,
+    "collection_date": "2026-06-30",
+    "compliance_certifications": [
+      "HIPAA",
+      "PCI DSS",
+      "GDPR"
+    ],
+    "container_support": true,
+    "disaster_recovery": true,
+    "documentation_url": "https://docs.aws.amazon.com/",
+    "free_tier": true,
+    "gpu_support": true,
+    "hybrid_cloud": true,
+    "kubernetes_support": true,
+    "load_balancer": true,
+    "minimum_vm_price_usd_hour": null,
+    "monitoring": true,
+    "provider_name": "Amazon Web Services (AWS)",
+    "region_count": 39,
+    "security_certifications": [
+      "ISO27001",
+      "SOC2"
+    ],
+    "source_type": "official_multi_source",
+    "source_url": "https://docs.aws.amazon.com/",
+    "storage_price_usd_gb_month": null,
+    "support_24x7": true,
+    "support_tier": "Enterprise"
+  },
+  {
+    "auto_scaling": true,
+    "availability_sla_percent": 99.99,
+    "availability_zone_count": null,
+    "backup": true,
+    "collection_date": "2026-06-30",
+    "compliance_certifications": [
+      "HIPAA",
+      "PCI DSS",
+      "GDPR"
+    ],
+    "container_support": true,
+    "disaster_recovery": true,
+    "documentation_url": "https://learn.microsoft.com/en-us/azure/",
+    "free_tier": true,
+    "gpu_support": true,
+    "hybrid_cloud": true,
+    "kubernetes_support": true,
+    "load_balancer": true,
+    "minimum_vm_price_usd_hour": null,
+    "monitoring": true,
+    "provider_name": "Microsoft Azure",
+    "region_count": null,
+    "security_certifications": [
+      "ISO27001",
+      "SOC2"
+    ],
+    "source_type": "official_multi_source",
+    "source_url": "https://learn.microsoft.com/en-us/azure/",
+    "storage_price_usd_gb_month": null,
+    "support_24x7": true,
+    "support_tier": "Enterprise"
+  },
+  {
+    "auto_scaling": true,
+    "availability_sla_percent": 99.99,
+    "availability_zone_count": 130,
+    "backup": true,
+    "collection_date": "2026-06-30",
+    "compliance_certifications": [
+      "HIPAA",
+      "PCI DSS",
+      "GDPR"
+    ],
+    "container_support": true,
+    "disaster_recovery": true,
+    "documentation_url": "https://cloud.google.com/docs",
+    "free_tier": true,
+    "gpu_support": true,
+    "hybrid_cloud": true,
+    "kubernetes_support": true,
+    "load_balancer": true,
+    "minimum_vm_price_usd_hour": null,
+    "monitoring": true,
+    "provider_name": "Google Cloud Platform (GCP)",
+    "region_count": 43,
+    "security_certifications": [
+      "ISO27001",
+      "SOC2"
+    ],
+    "source_type": "official_multi_source",
+    "source_url": "https://cloud.google.com/docs",
+    "storage_price_usd_gb_month": null,
+    "support_24x7": true,
+    "support_tier": "Premium"
+  },
+  {
+    "auto_scaling": true,
+    "availability_sla_percent": 99.99,
+    "availability_zone_count": null,
+    "backup": true,
+    "collection_date": "2026-06-30",
+    "compliance_certifications": [
+      "HIPAA",
+      "PCI DSS",
+      "GDPR"
+    ],
+    "container_support": true,
+    "disaster_recovery": true,
+    "documentation_url": "https://docs.oracle.com/en-us/iaas/Content/home.htm",
+    "free_tier": true,
+    "gpu_support": true,
+    "hybrid_cloud": true,
+    "kubernetes_support": true,
+    "load_balancer": true,
+    "minimum_vm_price_usd_hour": null,
+    "monitoring": true,
+    "provider_name": "Oracle Cloud Infrastructure (OCI)",
+    "region_count": 50,
+    "security_certifications": [
+      "ISO27001",
+      "SOC2"
+    ],
+    "source_type": "official_multi_source",
+    "source_url": "https://docs.oracle.com/en-us/iaas/Content/home.htm",
+    "storage_price_usd_gb_month": null,
+    "support_24x7": true,
+    "support_tier": "Premier"
+  },
+  {
+    "auto_scaling": true,
+    "availability_sla_percent": 99.99,
+    "availability_zone_count": 40,
+    "backup": true,
+    "collection_date": "2026-06-30",
+    "compliance_certifications": [
+      "HIPAA",
+      "PCI DSS",
+      "GDPR"
+    ],
+    "container_support": true,
+    "disaster_recovery": true,
+    "documentation_url": "https://cloud.ibm.com/docs",
+    "free_tier": true,
+    "gpu_support": true,
+    "hybrid_cloud": true,
+    "kubernetes_support": true,
+    "load_balancer": true,
+    "minimum_vm_price_usd_hour": null,
+    "monitoring": true,
+    "provider_name": "IBM Cloud",
+    "region_count": 13,
+    "security_certifications": [
+      "ISO27001",
+      "SOC2"
+    ],
+    "source_type": "official_multi_source",
+    "source_url": "https://cloud.ibm.com/docs",
+    "storage_price_usd_gb_month": null,
+    "support_24x7": true,
+    "support_tier": "Premium"
+  }
+]

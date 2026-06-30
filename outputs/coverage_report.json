@@ -1,0 +1,210 @@
+{
+  "by_attribute": {
+    "auto_scaling": {
+      "coverage_percent": 100.0,
+      "missing_count": 0,
+      "missing_providers": [],
+      "missing_reasons": {},
+      "present_count": 5
+    },
+    "availability_sla_percent": {
+      "coverage_percent": 100.0,
+      "missing_count": 0,
+      "missing_providers": [],
+      "missing_reasons": {},
+      "present_count": 5
+    },
+    "availability_zone_count": {
+      "coverage_percent": 60.0,
+      "missing_count": 2,
+      "missing_providers": [
+        "Microsoft Azure",
+        "Oracle Cloud Infrastructure (OCI)"
+      ],
+      "missing_reasons": {
+        "Microsoft Azure": "Microsoft publishes zone support by region but no authoritative global availability-zone total.",
+        "Oracle Cloud Infrastructure (OCI)": "OCI publishes Availability Domains per region but no authoritative global Availability Domain total."
+      },
+      "present_count": 3
+    },
+    "backup": {
+      "coverage_percent": 100.0,
+      "missing_count": 0,
+      "missing_providers": [],
+      "missing_reasons": {},
+      "present_count": 5
+    },
+    "collection_date": {
+      "coverage_percent": 100.0,
+      "missing_count": 0,
+      "missing_providers": [],
+      "missing_reasons": {},
+      "present_count": 5
+    },
+    "compliance_certifications": {
+      "coverage_percent": 100.0,
+      "missing_count": 0,
+      "missing_providers": [],
+      "missing_reasons": {},
+      "present_count": 5
+    },
+    "container_support": {
+      "coverage_percent": 100.0,
+      "missing_count": 0,
+      "missing_providers": [],
+      "missing_reasons": {},
+      "present_count": 5
+    },
+    "disaster_recovery": {
+      "coverage_percent": 100.0,
+      "missing_count": 0,
+      "missing_providers": [],
+      "missing_reasons": {},
+      "present_count": 5
+    },
+    "documentation_url": {
+      "coverage_percent": 100.0,
+      "missing_count": 0,
+      "missing_providers": [],
+      "missing_reasons": {},
+      "present_count": 5
+    },
+    "free_tier": {
+      "coverage_percent": 100.0,
+      "missing_count": 0,
+      "missing_providers": [],
+      "missing_reasons": {},
+      "present_count": 5
+    },
+    "gpu_support": {
+      "coverage_percent": 100.0,
+      "missing_count": 0,
+      "missing_providers": [],
+      "missing_reasons": {},
+      "present_count": 5
+    },
+    "hybrid_cloud": {
+      "coverage_percent": 100.0,
+      "missing_count": 0,
+      "missing_providers": [],
+      "missing_reasons": {},
+      "present_count": 5
+    },
+    "kubernetes_support": {
+      "coverage_percent": 100.0,
+      "missing_count": 0,
+      "missing_providers": [],
+      "missing_reasons": {},
+      "present_count": 5
+    },
+    "load_balancer": {
+      "coverage_percent": 100.0,
+      "missing_count": 0,
+      "missing_providers": [],
+      "missing_reasons": {},
+      "present_count": 5
+    },
+    "minimum_vm_price_usd_hour": {
+      "coverage_percent": 0.0,
+      "missing_count": 5,
+      "missing_providers": [
+        "Amazon Web Services (AWS)",
+        "Microsoft Azure",
+        "Google Cloud Platform (GCP)",
+        "Oracle Cloud Infrastructure (OCI)",
+        "IBM Cloud"
+      ],
+      "missing_reasons": {
+        "Amazon Web Services (AWS)": "The official EC2 price table is dynamic and region, architecture, OS, and purchase-option dependent; no reproducible global minimum is published.",
+        "Google Cloud Platform (GCP)": "Compute Engine pricing is SKU, configuration, operating-system, discount, and location dependent; the product page's rounded starting price is not an exact reproducible minimum.",
+        "IBM Cloud": "IBM VPC virtual-server pricing is profile, operating-system, location, and configuration dependent and no exact global minimum is published.",
+        "Microsoft Azure": "Azure VM prices are dynamically calculated by region, currency, operating system, agreement, and VM size; no exact global minimum is published.",
+        "Oracle Cloud Infrastructure (OCI)": "OCI flexible VM price requires both OCPU and memory quantities, and the brief does not define a minimum valid VM configuration."
+      },
+      "present_count": 0
+    },
+    "monitoring": {
+      "coverage_percent": 100.0,
+      "missing_count": 0,
+      "missing_providers": [],
+      "missing_reasons": {},
+      "present_count": 5
+    },
+    "provider_name": {
+      "coverage_percent": 100.0,
+      "missing_count": 0,
+      "missing_providers": [],
+      "missing_reasons": {},
+      "present_count": 5
+    },
+    "region_count": {
+      "coverage_percent": 80.0,
+      "missing_count": 1,
+      "missing_providers": [
+        "Microsoft Azure"
+      ],
+      "missing_reasons": {
+        "Microsoft Azure": "Microsoft publishes '70+ Azure regions', which is not an exact machine-readable count."
+      },
+      "present_count": 4
+    },
+    "security_certifications": {
+      "coverage_percent": 100.0,
+      "missing_count": 0,
+      "missing_providers": [],
+      "missing_reasons": {},
+      "present_count": 5
+    },
+    "source_type": {
+      "coverage_percent": 100.0,
+      "missing_count": 0,
+      "missing_providers": [],
+      "missing_reasons": {},
+      "present_count": 5
+    },
+    "source_url": {
+      "coverage_percent": 100.0,
+      "missing_count": 0,
+      "missing_providers": [],
+      "missing_reasons": {},
+      "present_count": 5
+    },
+    "storage_price_usd_gb_month": {
+      "coverage_percent": 0.0,
+      "missing_count": 5,
+      "missing_providers": [
+        "Amazon Web Services (AWS)",
+        "Microsoft Azure",
+        "Google Cloud Platform (GCP)",
+        "Oracle Cloud Infrastructure (OCI)",
+        "IBM Cloud"
+      ],
+      "missing_reasons": {
+        "Amazon Web Services (AWS)": "Storage class and reference region were not specified; AWS publishes multiple usage-dependent S3 rates rather than one storage price.",
+        "Google Cloud Platform (GCP)": "Cloud Storage class and reference location were not specified; official prices vary by class, location, operation, and retrieval.",
+        "IBM Cloud": "IBM Cloud storage pricing varies by service, class, location, capacity, and usage; no storage class was specified.",
+        "Microsoft Azure": "Storage service, redundancy, access tier, and reference region were not specified; Azure publishes multiple rates.",
+        "Oracle Cloud Infrastructure (OCI)": "OCI publishes separate object, archive, block, file, performance, and request rates; no storage class was specified."
+      },
+      "present_count": 0
+    },
+    "support_24x7": {
+      "coverage_percent": 100.0,
+      "missing_count": 0,
+      "missing_providers": [],
+      "missing_reasons": {},
+      "present_count": 5
+    },
+    "support_tier": {
+      "coverage_percent": 100.0,
+      "missing_count": 0,
+      "missing_providers": [],
+      "missing_reasons": {},
+      "present_count": 5
+    }
+  },
+  "collected_value_count": 107,
+  "coverage_percent": 89.17,
+  "missing_value_count": 13,
+  "total_value_count": 120
+}

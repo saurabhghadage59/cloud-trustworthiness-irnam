@@ -1,0 +1,122 @@
+{
+  "boolean_fields": {
+    "auto_scaling": {
+      "false": 0,
+      "null": 0,
+      "true": 5
+    },
+    "backup": {
+      "false": 0,
+      "null": 0,
+      "true": 5
+    },
+    "container_support": {
+      "false": 0,
+      "null": 0,
+      "true": 5
+    },
+    "disaster_recovery": {
+      "false": 0,
+      "null": 0,
+      "true": 5
+    },
+    "free_tier": {
+      "false": 0,
+      "null": 0,
+      "true": 5
+    },
+    "gpu_support": {
+      "false": 0,
+      "null": 0,
+      "true": 5
+    },
+    "hybrid_cloud": {
+      "false": 0,
+      "null": 0,
+      "true": 5
+    },
+    "kubernetes_support": {
+      "false": 0,
+      "null": 0,
+      "true": 5
+    },
+    "load_balancer": {
+      "false": 0,
+      "null": 0,
+      "true": 5
+    },
+    "monitoring": {
+      "false": 0,
+      "null": 0,
+      "true": 5
+    },
+    "support_24x7": {
+      "false": 0,
+      "null": 0,
+      "true": 5
+    }
+  },
+  "certification_counts": {
+    "compliance_certifications": {
+      "GDPR": 5,
+      "HIPAA": 5,
+      "PCI DSS": 5
+    },
+    "security_certifications": {
+      "ISO27001": 5,
+      "SOC2": 5
+    }
+  },
+  "confidence_counts": {
+    "high": 104,
+    "medium": 3,
+    "unavailable": 13
+  },
+  "numeric_fields": {
+    "availability_sla_percent": {
+      "count": 5,
+      "maximum": 99.99,
+      "mean": 99.99,
+      "minimum": 99.99
+    },
+    "availability_zone_count": {
+      "count": 3,
+      "maximum": 130,
+      "mean": 97.666667,
+      "minimum": 40
+    },
+    "minimum_vm_price_usd_hour": {
+      "count": 0,
+      "maximum": null,
+      "mean": null,
+      "minimum": null
+    },
+    "region_count": {
+      "count": 4,
+      "maximum": 50,
+      "mean": 36.25,
+      "minimum": 13
+    },
+    "storage_price_usd_gb_month": {
+      "count": 0,
+      "maximum": null,
+      "mean": null,
+      "minimum": null
+    }
+  },
+  "source_type_counts": {
+    "collection_metadata": 10,
+    "official_compliance_documentation": 10,
+    "official_documentation": 20,
+    "official_feature_documentation": 45,
+    "official_pricing": 10,
+    "official_region_documentation": 10,
+    "official_sla_documentation": 5,
+    "official_support_documentation": 10
+  },
+  "support_tier_counts": {
+    "Enterprise": 2,
+    "Premier": 1,
+    "Premium": 2
+  }
+}

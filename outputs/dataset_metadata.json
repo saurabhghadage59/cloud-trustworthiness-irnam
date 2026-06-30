@@ -1,0 +1,13 @@
+{
+  "attribute_count": 24,
+  "cloud_dataset_json_sha256": "f74c4dff6715f41238e3501ae3aeb080da67d18adf17c64fe2317e2b26ba2ece",
+  "collection_date": "2026-06-30",
+  "coverage_percent": 89.17,
+  "missing_value_count": 13,
+  "provider_count": 5,
+  "schema_version": "2.0.0",
+  "source_record_count": 120,
+  "validation_issue_counts": {
+    "warning": 13
+  }
+}
