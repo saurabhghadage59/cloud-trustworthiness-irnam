@@ -81,6 +81,66 @@ Phase-1 read-only names (`availability_sla`, `compute_pricing`, `storage_pricing
 
 Pricing, locations, support plans, certifications, and products change. Every published dataset must be treated as a dated research snapshot and re-reviewed against official sources.
 
+## Recommendation phase (Algorithms 1 and 2)
+
+The completed `src/recommendation/` package consumes the structured JSON dataset without parsing natural-language provider descriptions.
+
+Algorithm 1 assigns a positive score to each priority (`very_low=1` through `very_high=5`) and normalizes it:
+
+```text
+user_weight[j] = priority_score[j] / sum(priority_scores)
+```
+
+Algorithm 2 converts each comparable provider column to an evaluation score in `[0, 1]`. Benefit attributes use `(x-min)/(max-min)` and cost attributes use `(max-x)/(max-min)`. Equal non-null columns score `1`; unavailable values score `0` and are never estimated. Booleans map to `1/0`, arrays use cardinality, and enums use explicit controlled scales. The overall score is:
+
+```text
+overall_score[i] = sum(user_weight[j] * evaluation_score[i,j])
+```
+
+Providers are sorted by overall score and receive dense ranks, so tied providers share a rank. Filtering occurs before ranking and supports mandatory values, min/max/equality/containment constraints, requested service flags, and unavailable-provider exclusions.
+
+```python
+from src.recommendation import RecommendationEngine, UserRequirementProcessor
+
+requirement = UserRequirementProcessor().process({
+    "availability": "very_high",
+    "reliability": "high",
+    "security": "high",
+    "cost": "medium",
+    "response_time": "low",
+    "scalability": "high",
+    "support": "medium",
+    "storage": "low",
+    "network": "medium",
+})
+
+result = RecommendationEngine().recommend(
+    requirement,
+    requested_services=["kubernetes_support"],
+    unavailable_providers=[],
+)
+
+negotiation_input = result  # RecommendationResult implements Mapping[str, Any].
+```
+
+`RecommendationResult` contains the recommended provider, overall score, full ranking, attribute scores, normalized user weights, dataset-derived provider weights, raw provider attributes, filtering reasons, and a deterministic explanation. It can be passed directly to `NegotiationEngine`; negotiation is never started automatically.
+
+## End-to-end demonstration
+
+The root `main.py` is the integration layer for the complete research workflow:
+
+```text
+Dataset → User Requirements → Recommendation → Negotiation → SLA → Evaluation
+```
+
+Run the reproducible built-in demonstration:
+
+```powershell
+python main.py
+```
+
+Use `python main.py --help` to supply a dataset path, user-priority JSON, user-SLA JSON, provider-SLA JSON, negotiation strategy, round limit, or interactive input. The command logs each phase and prints one JSON object containing the dataset summary, requirements, recommendation, negotiation trace, generated SLA, and evaluation metrics.
+
 ## Negotiation, aggregation, and SLA phase
 
 The `negotiation/`, `sla/`, and `evaluation/` packages implement the IRNAM phases after Recommendation. The implementation consumes Recommendation output as a plain dictionary and does not duplicate ranking or dataset logic.
