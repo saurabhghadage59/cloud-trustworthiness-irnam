@@ -52,6 +52,7 @@ Python 3.10 or newer is required; the builder uses only the standard library.
 
 ```powershell
 python -m unittest discover -s tests -p "test_dataset_builder.py" -v
+python -m unittest discover -s tests -v
 python -m dataset_builder --collection-date 2026-06-30 --output-dir outputs
 ```
 
@@ -79,3 +80,42 @@ Phase-1 read-only names (`availability_sla`, `compute_pricing`, `storage_pricing
 5. Extend tests, rebuild, and inspect `sources.csv`, `coverage_report.json`, and `dataset_report.md`.
 
 Pricing, locations, support plans, certifications, and products change. Every published dataset must be treated as a dated research snapshot and re-reviewed against official sources.
+
+## Negotiation, aggregation, and SLA phase
+
+The `negotiation/`, `sla/`, and `evaluation/` packages implement the IRNAM phases after Recommendation. The implementation consumes Recommendation output as a plain dictionary and does not duplicate ranking or dataset logic.
+
+Typical flow:
+
+```python
+from negotiation import NegotiationConfig, NegotiationEngine
+from sla import SLAManager
+from evaluation import calculate_negotiation_metrics
+
+recommendation = {
+    "recommended_provider": "CSP1",
+    "overall_score": 0.21,
+    "user_priorities": {"price": 0.46, "security": 0.26},
+}
+
+user_sla = {
+    "price": {"value": 100, "min": 95, "max": 120},
+    "security": {"value": 90, "min": 85, "max": 95},
+}
+
+provider_sla = {
+    "price": {"value": 125, "min": 105, "max": 130},
+    "security": {"value": 75, "min": 70, "max": 80},
+    "weights": {"price": 0.46, "security": 0.04},
+}
+
+engine = NegotiationEngine(NegotiationConfig(strategy="win_win", max_rounds=10))
+result = engine.negotiate(recommendation, user_sla, provider_sla)
+
+contract = SLAManager().create_contract(result)
+metrics = calculate_negotiation_metrics([result])
+```
+
+Algorithm 3 is represented by `NegotiationEngine.negotiate()`: it extracts negotiable attributes, normalizes values, computes party aggregated evaluation scores, calculates the degree of difference, applies configurable concession strategies (`competitive`, `win_win`, `collaborative`), generates counter offers, and stops on agreement or deadline.
+
+Algorithm 4 is represented by `AggregationEngine.aggregate()`: it accepts a final offer only when user satisfaction is greater than or equal to provider satisfaction. `SLAManager.create_contract()` then serializes the accepted result into a JSON-ready SLA contract containing provider, negotiated attributes, strategy, timestamp, rounds, satisfaction, and agreement status.
