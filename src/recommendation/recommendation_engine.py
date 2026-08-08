@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import csv
+import math
 import logging
 from collections.abc import Iterator, Mapping, Sequence
 from dataclasses import dataclass, field
@@ -12,6 +14,9 @@ from typing import Any, Dict, List, Optional
 from .models import Requirement
 from .ranking import ProviderRanker, RankedProvider
 from .weights import WeightCalculator
+from .algorithms import create_strategy
+from src.dataset.schema_mapping import adapt_row
+from src.dataset.qos_preprocessing import QOS_CRITERIA, is_mentor_qos_schema, preprocess_qos_rows
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +36,10 @@ DEFAULT_ATTRIBUTE_MAPPING = {
 DEFAULT_DIRECTIONS = {
     "minimum_vm_price_usd_hour": "lower",
     "storage_price_usd_gb_month": "lower",
+    "response_time": "lower",
+    "latency": "lower",
+    "ResponseTimeMs": "lower",
+    "LatencyMs": "lower",
 }
 
 DEFAULT_ENUM_SCALES = {
@@ -60,6 +69,7 @@ class RecommendationResult(Mapping[str, Any]):
     provider_weights: Dict[str, Dict[str, float]] = field(default_factory=dict)
     provider_attributes: Dict[str, Any] = field(default_factory=dict)
     filtered_out: Dict[str, List[str]] = field(default_factory=dict)
+    recommendation_confidence: float = 0.0
 
     @property
     def ranking(self) -> List[RankedProvider]:
@@ -84,6 +94,7 @@ class RecommendationResult(Mapping[str, Any]):
             "provider_weights": {name: dict(weights) for name, weights in self.provider_weights.items()},
             "provider_attributes": dict(self.provider_attributes),
             "filtered_out": {name: list(reasons) for name, reasons in self.filtered_out.items()},
+            "recommendation_confidence": self.recommendation_confidence,
         }
 
     def __getitem__(self, key: str) -> Any:
@@ -106,6 +117,8 @@ class RecommendationEngine:
         attribute_mapping: Optional[Mapping[str, Any]] = None,
         directions: Optional[Mapping[str, str]] = None,
         enum_scales: Optional[Mapping[str, Mapping[Any, float]]] = None,
+        algorithm: str = "IRNAM_Weighted",
+        normalization: str = "minmax",
     ) -> None:
         self.dataset_path = Path(dataset_path) if dataset_path else Path(__file__).resolve().parents[2] / "outputs" / "cloud_dataset.json"
         self._providers = [dict(provider) for provider in providers] if providers is not None else None
@@ -113,6 +126,8 @@ class RecommendationEngine:
         self.directions = dict(DEFAULT_DIRECTIONS)
         self.directions.update(directions or {})
         self.enum_scales = {name: dict(scale) for name, scale in (enum_scales or DEFAULT_ENUM_SCALES).items()}
+        self.algorithm = algorithm
+        self.normalization = normalization
         self.weight_calculator = WeightCalculator()
         self.ranker = ProviderRanker()
 
@@ -134,11 +149,10 @@ class RecommendationEngine:
         if not isinstance(requirement, Requirement):
             raise TypeError("requirement must be a Requirement object")
         logger.info("Recommendation Started")
-        providers = self.load_dataset()
+        providers = self._with_calculated_trust(self.load_dataset())
         logger.info("Dataset Loaded: %d providers", len(providers))
 
-        user_weights = self.weight_calculator.calculate_user_weights(requirement)
-        logger.info("Weights Generated: %d attributes", len(user_weights))
+        requested_weights = self.weight_calculator.calculate_user_weights(requirement)
 
         mandatory = dict(mandatory_requirements or getattr(requirement, "mandatory_requirements", {}) or {})
         limits = dict(constraints or getattr(requirement, "constraints", {}) or {})
@@ -150,17 +164,30 @@ class RecommendationEngine:
         if not valid:
             reason = "No provider satisfies all mandatory requirements and constraints."
             logger.info("Recommendation Generated: no eligible provider")
-            return RecommendationResult(None, 0.0, [], {}, reason, user_weights, {}, {}, filtered_out)
+            return RecommendationResult(None, 0.0, [], {}, reason, requested_weights, {}, {}, filtered_out, 0.0)
 
-        mapped_fields = self._mapped_provider_fields(user_weights)
+        # Resolve aliases against the actual source schema, so benchmark and
+        # future CSV datasets need no hard-coded provider-specific mappings.
+        resolved_mapping = self._resolve_mapping(requested_weights, valid)
+        active_mapping = {attribute: specification for attribute, specification in resolved_mapping.items() if self._mapping_has_values(specification, valid)}
+        skipped = sorted(set(requested_weights) - set(active_mapping))
+        for attribute in skipped:
+            message = f"Optional criterion '{attribute}' is unavailable in this dataset and will be skipped."
+            logger.warning(message)
+        if not active_mapping:
+            raise ValueError("No requested criteria are available in the dataset; verify the CSV schema mapping.")
+        weight_total = sum(requested_weights[attribute] for attribute in active_mapping)
+        user_weights = {attribute: requested_weights[attribute] / weight_total for attribute in active_mapping}
+        logger.info("Weights Generated: %d active attributes (%d skipped)", len(user_weights), len(skipped))
+        mapped_fields = self._mapped_provider_fields(user_weights, active_mapping)
         provider_weights = self.weight_calculator.calculate_provider_weights(valid, mapped_fields, self.enum_scales)
-        ranking = self.ranker.rank_providers(
-            valid,
-            user_weights,
-            {attribute: self.attribute_mapping.get(attribute, attribute) for attribute in user_weights},
-            self.directions,
-            self.enum_scales,
-        )
+        if self.algorithm.casefold() in {"irnam_weighted", "irnam", "weighted sum", "weighted_sum"}:
+            ranking = self.ranker.rank_providers(valid, user_weights, active_mapping, self.directions, self.enum_scales)
+        else:
+            # Strategy algorithms operate on already-resolved scalar fields.
+            scalar = {attribute: fields[0][0] for attribute, fields in ((a, self.ranker._mapping_fields(s)) for a, s in active_mapping.items()) if fields}
+            strategy = create_strategy(self.algorithm, normalization=self.normalization).fit(valid, {a: user_weights[a] for a in scalar}, {a: self.directions.get(field, "higher") for a, field in scalar.items()})
+            ranking = strategy.rank()
         logger.info("Ranking Completed: %d providers", len(ranking))
 
         best = ranking[0]
@@ -175,6 +202,7 @@ class RecommendationEngine:
             provider_weights=provider_weights,
             provider_attributes=dict(best.provider_attributes),
             filtered_out=filtered_out,
+            recommendation_confidence=self._recommendation_confidence(ranking),
         )
         logger.info("Recommendation Generated: %s", best.provider)
         return result
@@ -191,7 +219,12 @@ class RecommendationEngine:
             providers = [dict(provider) for provider in self._providers]
         else:
             try:
-                payload = json.loads(self.dataset_path.read_text(encoding="utf-8"))
+                if self.dataset_path.suffix.casefold() == ".csv":
+                    with self.dataset_path.open(encoding="utf-8", newline="") as handle:
+                        providers = [self._coerce_csv_row(row) for row in csv.DictReader(handle)]
+                    payload = providers
+                else:
+                    payload = json.loads(self.dataset_path.read_text(encoding="utf-8"))
             except FileNotFoundError as exc:
                 raise FileNotFoundError(f"Structured dataset not found: {self.dataset_path}") from exc
             except json.JSONDecodeError as exc:
@@ -202,7 +235,10 @@ class RecommendationEngine:
         if not providers:
             raise ValueError("Structured dataset contains no providers")
         if any(not self._provider_name(provider) for provider in providers):
-            raise ValueError("Every dataset row must contain a provider name")
+            raise ValueError("Every dataset row requires Provider, Provider Name, or Service Name")
+        self.preprocessing_report = None
+        if is_mentor_qos_schema(providers):
+            providers, self.preprocessing_report = preprocess_qos_rows(providers)
         return providers
 
     def filter_providers(
@@ -265,11 +301,91 @@ class RecommendationEngine:
         fields = self.ranker._mapping_fields(specification)
         return [provider.get(field_name) for field_name, _ in fields]
 
-    def _mapped_provider_fields(self, user_weights: Mapping[str, float]) -> List[str]:
+    def _mapped_provider_fields(self, user_weights: Mapping[str, float], mapping: Optional[Mapping[str, Any]] = None) -> List[str]:
         fields = []
         for attribute in user_weights:
-            fields.extend(name for name, _ in self.ranker._mapping_fields(self.attribute_mapping.get(attribute, attribute)))
+            fields.extend(name for name, _ in self.ranker._mapping_fields((mapping or self.attribute_mapping).get(attribute, attribute)))
         return list(dict.fromkeys(fields))
+
+    def _resolve_mapping(self, user_weights: Mapping[str, float], providers: Sequence[Mapping[str, Any]]) -> Dict[str, Any]:
+        """Use configured aliases when present and infer benchmark columns otherwise."""
+        keys = {key for provider in providers for key in provider}
+        aliases = {
+            "availability": ("availability", "Availability", "availability_sla_percent"), "reliability": ("reliability", "Reliability"),
+            "latency": ("latency", "LatencyMs"), "response_time": ("response_time", "ResponseTimeMs"), "throughput": ("throughput", "ThroughputMbps"),
+            "packet_loss": ("PacketLossPct",), "security": ("security", "SecurityScore"), "compliance": ("compliance", "ComplianceScore"),
+            "throughput": ("throughput", "ThroughputMbps"), "documentation": ("documentation",), "best_practices": ("best_practices",),
+            "support": ("support", "SupportScore"), "cost": ("cost", "CostPerHourUSD", "minimum_vm_price_usd_hour"),
+            "scalability": ("scalability", "ScalabilityScore"), "network": ("BandwidthMbps",), "energy_efficiency": ("EnergyEfficiency",),
+            "customer_rating": ("CustomerRating",), "trust_score": ("TrustScore",), "storage": ("StorageGB",),
+        }
+        result = {}
+        for attribute in user_weights:
+            configured = self.attribute_mapping.get(attribute, attribute)
+            fields = self.ranker._mapping_fields(configured)
+            if fields and any(field in keys for field, _ in fields): result[attribute] = configured
+            elif attribute in keys: result[attribute] = attribute
+            elif attribute.lower() in {str(x).lower() for x in keys}:
+                result[attribute] = next(x for x in keys if x.lower() == attribute.lower())
+            elif attribute in aliases:
+                present = [x for x in aliases[attribute] if x in keys]
+                result[attribute] = present[0] if present else configured
+            else: result[attribute] = configured
+        return result
+
+    @staticmethod
+    def _mapping_has_values(specification: Any, providers: Sequence[Mapping[str, Any]]) -> bool:
+        return any(provider.get(field) is not None for field, _ in ProviderRanker._mapping_fields(specification) for provider in providers)
+
+    @staticmethod
+    def _recommendation_confidence(ranking: Sequence[RankedProvider]) -> float:
+        """Estimate confidence from the winning margin relative to score spread.
+
+        It is deliberately not the winning score: a high score with a close
+        runner-up has lower confidence than a clearly separated winner.
+        """
+        if not ranking:
+            return 0.0
+        if len(ranking) == 1:
+            return 1.0
+        scores = [item.overall_score for item in ranking]
+        mean = sum(scores) / len(scores)
+        spread = (sum((score - mean) ** 2 for score in scores) / len(scores)) ** 0.5
+        margin = max(0.0, scores[0] - scores[1])
+        return round(1.0 / (1.0 + math.exp(-margin / max(spread, 1e-9))), 6)
+
+    def _with_calculated_trust(self, providers: Sequence[Mapping[str, Any]]) -> List[Dict[str, Any]]:
+        """Calculate comparable 0–100 trust from observed benchmark QoS fields."""
+        records = [dict(provider) for provider in providers]
+        if records and all(name in records[0] for name in QOS_CRITERIA):
+            normalized = {name: self.ranker._normalize_column([record.get(name) for record in records], "lower" if spec["type"] == "cost" else "higher") for name, spec in QOS_CRITERIA.items()}
+            for index, record in enumerate(records): record["TrustScore"] = round(100 * sum(normalized[name][index] for name in QOS_CRITERIA) / len(QOS_CRITERIA), 2)
+            return records
+        components = {
+            "Availability": ("availability", "Availability", "availability_sla_percent"), "Reliability": ("reliability", "Reliability"),
+            "Security": ("security", "SecurityScore"), "Compliance": ("compliance", "ComplianceScore"), "Support": ("support", "SupportScore", "documentation_score"),
+            "Rating": ("customer_rating", "CustomerRating"), "Energy": ("energy_efficiency", "EnergyEfficiency"), "SLA violations": ("sla_violation_rate", "SLAViolationRate"),
+        }
+        weights = {"Availability": .18, "Reliability": .16, "Security": .16, "Compliance": .12, "Support": .12, "Rating": .10, "Energy": .08, "SLA violations": .08}
+        normalized: Dict[str, List[float]] = {}
+        for label, fields in components.items():
+            values = [next((record.get(key) for key in fields if isinstance(record.get(key), (int, float)) and not isinstance(record.get(key), bool)), None) for record in records]
+            normalized[label] = self.ranker._normalize_column(values, "lower" if label == "SLA violations" else "higher")
+        for index, record in enumerate(records):
+            record["TrustScore"] = round(100 * sum(weights[label] * normalized[label][index] for label in weights), 2)
+        return records
+
+    @staticmethod
+    def _coerce_csv_row(row: Mapping[str, str]) -> Dict[str, Any]:
+        converted: Dict[str, Any] = {}
+        for key, value in adapt_row(row).items():
+            if value is None or not value.strip(): converted[key] = None
+            elif value.strip().casefold() in {"true", "false"}: converted[key] = value.strip().casefold() == "true"
+            else:
+                try: converted[key] = float(value) if "." in value or "e" in value.lower() else int(value)
+                except ValueError: converted[key] = value.strip()
+        converted.setdefault("provider_name", converted.get("Provider"))
+        return converted
 
     @staticmethod
     def _matches(actual: Any, expected: Any) -> bool:

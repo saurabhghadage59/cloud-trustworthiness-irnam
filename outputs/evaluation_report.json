@@ -1,0 +1,74 @@
+[
+  {
+    "algorithm": "IRNAM_Weighted",
+    "top_provider": "dConverterSOAP",
+    "top_score": 0.74945991265,
+    "execution_seconds": 0.005256599994027056,
+    "memory_bytes": 13208,
+    "rank": 1,
+    "provider_count": 1643
+  },
+  {
+    "algorithm": "TOPSIS",
+    "top_provider": "dConverterSOAP",
+    "top_score": 0.695904436185,
+    "execution_seconds": 0.08701759998803027,
+    "memory_bytes": 2569503,
+    "rank": 1,
+    "provider_count": 1643
+  },
+  {
+    "algorithm": "AHP",
+    "top_provider": "dConverterSOAP",
+    "top_score": 0.74945991265,
+    "execution_seconds": 0.033686300012050197,
+    "memory_bytes": 2478807,
+    "rank": 1,
+    "provider_count": 1643
+  },
+  {
+    "algorithm": "VIKOR",
+    "top_provider": "RetHeaderService",
+    "top_score": 0.907956273826,
+    "execution_seconds": 0.19338690000586212,
+    "memory_bytes": 2481063,
+    "rank": 1,
+    "provider_count": 1643
+  },
+  {
+    "algorithm": "PROMETHEE II",
+    "top_provider": "dConverterSOAP",
+    "top_score": 0.74945991265,
+    "execution_seconds": 0.03967850000481121,
+    "memory_bytes": 2478791,
+    "rank": 1,
+    "provider_count": 1643
+  },
+  {
+    "algorithm": "ELECTRE",
+    "top_provider": "dConverterSOAP",
+    "top_score": 0.74945991265,
+    "execution_seconds": 0.03187550000438932,
+    "memory_bytes": 2570839,
+    "rank": 1,
+    "provider_count": 1643
+  },
+  {
+    "algorithm": "SAW",
+    "top_provider": "dConverterSOAP",
+    "top_score": 0.74945991265,
+    "execution_seconds": 0.029945800008135848,
+    "memory_bytes": 2478655,
+    "rank": 1,
+    "provider_count": 1643
+  },
+  {
+    "algorithm": "Weighted Product Model",
+    "top_provider": "RetHeaderService",
+    "top_score": 0.553093686444,
+    "execution_seconds": 0.03252369999245275,
+    "memory_bytes": 2478783,
+    "rank": 1,
+    "provider_count": 1643
+  }
+]

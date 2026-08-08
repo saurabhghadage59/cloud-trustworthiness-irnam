@@ -1,0 +1,33 @@
+{
+  "operations": [
+    "read_csv",
+    "coerce_types",
+    "infer_schema",
+    "validate",
+    "export_json"
+  ],
+  "missing_values": {
+    "Provider": 0,
+    "Region": 0,
+    "ServiceType": 0,
+    "CPUCores": 0,
+    "RAMGB": 0,
+    "StorageGB": 0,
+    "BandwidthMbps": 0,
+    "Availability": 0,
+    "Reliability": 0,
+    "LatencyMs": 0,
+    "ResponseTimeMs": 0,
+    "ThroughputMbps": 0,
+    "PacketLossPct": 0,
+    "SecurityScore": 0,
+    "ComplianceScore": 0,
+    "SupportScore": 0,
+    "CostPerHourUSD": 0,
+    "ScalabilityScore": 0,
+    "SLAViolationRate": 0,
+    "EnergyEfficiency": 0,
+    "CustomerRating": 0,
+    "TrustScore": 0
+  }
+}

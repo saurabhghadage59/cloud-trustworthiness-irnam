@@ -1,0 +1,15 @@
+{
+  "negotiation_success_rate": 1.0,
+  "average_negotiation_time": 0.067661,
+  "average_negotiation_rounds": 1.0,
+  "concession_statistics": {
+    "min": 0.4548958333333334,
+    "max": 0.4548958333333334,
+    "avg": 0.4548958333333334,
+    "count": 1.0
+  },
+  "user_satisfaction": 0.18893279079861114,
+  "provider_satisfaction": 0.00028473453514068093,
+  "agreement_rate": 1.0,
+  "total_runs": 1
+}

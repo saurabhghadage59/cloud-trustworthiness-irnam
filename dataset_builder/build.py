@@ -6,6 +6,7 @@ from pathlib import Path
 from dataset_builder.collectors import COLLECTORS
 from dataset_builder.exporters import DatasetExporter
 from dataset_builder.validators.dataset import DatasetValidator
+from dataset_builder.benchmark import build_benchmark_dataset
 
 
 def build_dataset(output_dir: Path, collection_date: str | None = None, check_urls: bool = False):

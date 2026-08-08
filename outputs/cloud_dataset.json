@@ -4,7 +4,7 @@
     "availability_sla_percent": 99.99,
     "availability_zone_count": 123,
     "backup": true,
-    "collection_date": "2026-06-30",
+    "collection_date": "2026-08-02",
     "compliance_certifications": [
       "HIPAA",
       "PCI DSS",
@@ -37,7 +37,7 @@
     "availability_sla_percent": 99.99,
     "availability_zone_count": null,
     "backup": true,
-    "collection_date": "2026-06-30",
+    "collection_date": "2026-08-02",
     "compliance_certifications": [
       "HIPAA",
       "PCI DSS",
@@ -70,7 +70,7 @@
     "availability_sla_percent": 99.99,
     "availability_zone_count": 130,
     "backup": true,
-    "collection_date": "2026-06-30",
+    "collection_date": "2026-08-02",
     "compliance_certifications": [
       "HIPAA",
       "PCI DSS",
@@ -103,7 +103,7 @@
     "availability_sla_percent": 99.99,
     "availability_zone_count": null,
     "backup": true,
-    "collection_date": "2026-06-30",
+    "collection_date": "2026-08-02",
     "compliance_certifications": [
       "HIPAA",
       "PCI DSS",
@@ -136,7 +136,7 @@
     "availability_sla_percent": 99.99,
     "availability_zone_count": 40,
     "backup": true,
-    "collection_date": "2026-06-30",
+    "collection_date": "2026-08-02",
     "compliance_certifications": [
       "HIPAA",
       "PCI DSS",

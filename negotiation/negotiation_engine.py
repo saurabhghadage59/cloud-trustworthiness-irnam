@@ -38,6 +38,7 @@ class NegotiationEngine:
         started_at = datetime.now(timezone.utc)
         wall_start = time.monotonic()
         provider = provider_name_from_recommendation(recommendation)
+        confidence = self._negotiation_confidence(recommendation)
         logger.info("Negotiation Started for provider %s", provider)
 
         specs = build_attribute_specs(
@@ -58,7 +59,7 @@ class NegotiationEngine:
                 reason="no shared negotiable attributes",
                 started_at=started_at,
                 completed_at=completed_at,
-                recommendation=recommendation or {},
+                recommendation={**dict(recommendation or {}), "negotiation_confidence": confidence},
             )
 
         max_rounds = max(1, int(self.config.max_rounds))
@@ -152,5 +153,17 @@ class NegotiationEngine:
             reason=reason,
             started_at=started_at,
             completed_at=completed_at,
-            recommendation=recommendation or {},
+            recommendation={**dict(recommendation or {}), "negotiation_confidence": confidence},
         )
+
+    @staticmethod
+    def _negotiation_confidence(recommendation: Optional[Mapping[str, Any]]) -> float:
+        """Derive a transparent 0..1 confidence from recommendation evidence."""
+        attrs = (recommendation or {}).get("provider_attributes", {})
+        score = (recommendation or {}).get("overall_score", 0.0)
+        values = [score, attrs.get("TrustScore", attrs.get("trust_score")), attrs.get("Reliability", attrs.get("reliability")), attrs.get("SupportScore", attrs.get("support")), attrs.get("CustomerRating", attrs.get("customer_rating"))]
+        normalized = []
+        for value in values:
+            if isinstance(value, (int, float)) and not isinstance(value, bool):
+                normalized.append(float(value) / 100 if value > 5 else float(value) / 5 if value > 1 else float(value))
+        return round(sum(normalized) / len(normalized), 6) if normalized else 0.0

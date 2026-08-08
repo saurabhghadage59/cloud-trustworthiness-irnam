@@ -59,6 +59,15 @@ class ValidatorTests(unittest.TestCase):
         issues = DatasetValidator().validate_provider(provider)
         self.assertIn("invalid_enum", {issue.code for issue in issues})
 
+    def test_provider_can_represent_schema_adapted_qos_row(self):
+        provider = Provider.from_qos_row({
+            "Service Name": "CatalogService", "Availability": 99.5, "Reliability": 91,
+            "Throughput": 30, "Response Time": 40, "Latency": 15,
+            "Documentation": 88, "Best Practices": 93,
+        })
+        self.assertEqual("CatalogService", provider.provider_name)
+        self.assertEqual(40, provider.as_qos_dict()["response_time"])
+
 
 class ExporterTests(unittest.TestCase):
     def test_build_exports_all_required_artifacts(self):

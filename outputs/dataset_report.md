@@ -1,6 +1,6 @@
 # IRNAM Structured QoS Dataset Report
 
-Collection date: 2026-06-30
+Collection date: 2026-08-02
 
 ## Data quality summary
 

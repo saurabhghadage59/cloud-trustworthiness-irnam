@@ -1,0 +1,58 @@
+[
+  {
+    "algorithm": "IRNAM_Weighted",
+    "top_provider": "AWS",
+    "top_score": 1.0,
+    "execution_seconds": 0.0017293000128120184,
+    "memory_bytes": 94615
+  },
+  {
+    "algorithm": "TOPSIS",
+    "top_provider": "AWS",
+    "top_score": 1.0,
+    "execution_seconds": 0.0025668999878689647,
+    "memory_bytes": 104607
+  },
+  {
+    "algorithm": "AHP",
+    "top_provider": "AWS",
+    "top_score": 1.0,
+    "execution_seconds": 0.0010936000035144389,
+    "memory_bytes": 102007
+  },
+  {
+    "algorithm": "VIKOR",
+    "top_provider": "AWS",
+    "top_score": 1.0,
+    "execution_seconds": 0.0017107999883592129,
+    "memory_bytes": 104351
+  },
+  {
+    "algorithm": "PROMETHEE II",
+    "top_provider": "AWS",
+    "top_score": 1.0,
+    "execution_seconds": 0.0008829000289551914,
+    "memory_bytes": 101991
+  },
+  {
+    "algorithm": "ELECTRE",
+    "top_provider": "AWS",
+    "top_score": 1.0,
+    "execution_seconds": 0.000894299999345094,
+    "memory_bytes": 103111
+  },
+  {
+    "algorithm": "SAW",
+    "top_provider": "AWS",
+    "top_score": 1.0,
+    "execution_seconds": 0.0008973999647423625,
+    "memory_bytes": 102975
+  },
+  {
+    "algorithm": "Weighted Product Model",
+    "top_provider": "AWS",
+    "top_score": 1.0,
+    "execution_seconds": 0.0015144000062718987,
+    "memory_bytes": 103087
+  }
+]

@@ -1,0 +1,120 @@
+{
+  "source": "src\\dataset\\cloud_dataset.csv",
+  "generated_at": "2026-08-02T12:14:22.183436+00:00",
+  "row_count": 4800,
+  "schema": {
+    "Provider": {
+      "type": "string",
+      "missing_count": 0,
+      "direction": "benefit"
+    },
+    "Region": {
+      "type": "string",
+      "missing_count": 0,
+      "direction": "benefit"
+    },
+    "ServiceType": {
+      "type": "string",
+      "missing_count": 0,
+      "direction": "benefit"
+    },
+    "CPUCores": {
+      "type": "number",
+      "missing_count": 0,
+      "direction": "benefit"
+    },
+    "RAMGB": {
+      "type": "number",
+      "missing_count": 0,
+      "direction": "benefit"
+    },
+    "StorageGB": {
+      "type": "number",
+      "missing_count": 0,
+      "direction": "benefit"
+    },
+    "BandwidthMbps": {
+      "type": "number",
+      "missing_count": 0,
+      "direction": "benefit"
+    },
+    "Availability": {
+      "type": "number",
+      "missing_count": 0,
+      "direction": "benefit"
+    },
+    "Reliability": {
+      "type": "number",
+      "missing_count": 0,
+      "direction": "benefit"
+    },
+    "LatencyMs": {
+      "type": "number",
+      "missing_count": 0,
+      "direction": "cost"
+    },
+    "ResponseTimeMs": {
+      "type": "number",
+      "missing_count": 0,
+      "direction": "cost"
+    },
+    "ThroughputMbps": {
+      "type": "number",
+      "missing_count": 0,
+      "direction": "benefit"
+    },
+    "PacketLossPct": {
+      "type": "number",
+      "missing_count": 0,
+      "direction": "cost"
+    },
+    "SecurityScore": {
+      "type": "number",
+      "missing_count": 0,
+      "direction": "benefit"
+    },
+    "ComplianceScore": {
+      "type": "number",
+      "missing_count": 0,
+      "direction": "benefit"
+    },
+    "SupportScore": {
+      "type": "number",
+      "missing_count": 0,
+      "direction": "benefit"
+    },
+    "CostPerHourUSD": {
+      "type": "number",
+      "missing_count": 0,
+      "direction": "cost"
+    },
+    "ScalabilityScore": {
+      "type": "number",
+      "missing_count": 0,
+      "direction": "benefit"
+    },
+    "SLAViolationRate": {
+      "type": "number",
+      "missing_count": 0,
+      "direction": "cost"
+    },
+    "EnergyEfficiency": {
+      "type": "number",
+      "missing_count": 0,
+      "direction": "benefit"
+    },
+    "CustomerRating": {
+      "type": "number",
+      "missing_count": 0,
+      "direction": "benefit"
+    },
+    "TrustScore": {
+      "type": "number",
+      "missing_count": 0,
+      "direction": "benefit"
+    }
+  },
+  "validation_issues": [],
+  "valid": true,
+  "sha256": "6a2e4460cb72f236eb78d8c2b4091d1945a47b96e88f263e25a2ffd9663b83e4"
+}

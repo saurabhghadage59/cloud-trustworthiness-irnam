@@ -1,0 +1,15 @@
+CLOUD TRUSTWORTHINESS RECOMMENDATION REPORT
+
+Best provider: dConverterSOAP
+Overall score: 74.95
+Reason: Recommended dConverterSOAP for the best overall evaluation score (0.749460); strongest priority matches: availability, throughput, reliability.
+
+Algorithm comparison:
+- IRNAM_Weighted: dConverterSOAP (74.95)
+- TOPSIS: dConverterSOAP (69.59)
+- AHP: dConverterSOAP (74.95)
+- VIKOR: RetHeaderService (90.80)
+- PROMETHEE II: dConverterSOAP (74.95)
+- ELECTRE: dConverterSOAP (74.95)
+- SAW: dConverterSOAP (74.95)
+- Weighted Product Model: RetHeaderService (55.31)

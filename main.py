@@ -10,6 +10,7 @@ import argparse
 import json
 import logging
 import sys
+from time import perf_counter
 from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
@@ -20,6 +21,10 @@ from negotiation import NegotiationConfig, NegotiationEngine
 from sla import SLAManager
 from src.recommendation import RecommendationEngine, UserRequirementProcessor
 from src.recommendation.models import DEFAULT_ATTRIBUTE_ORDER, Requirement
+from src.terminal_reporter import TerminalReporter
+from evaluation.benchmark import run_benchmark
+from src.recommendation.ml import RandomForestModel, XGBoostModel, LightGBMModel
+from src.dataset.qos_preprocessing import QOS_CRITERIA
 
 logger = logging.getLogger("irnam")
 
@@ -27,13 +32,11 @@ logger = logging.getLogger("irnam")
 DEFAULT_PRIORITIES = {
     "availability": "very_high",
     "reliability": "high",
-    "security": "high",
-    "cost": "medium",
+    "throughput": "high",
     "response_time": "low",
-    "scalability": "high",
-    "support": "medium",
-    "storage": "low",
-    "network": "medium",
+    "latency": "low",
+    "documentation": "medium",
+    "best_practices": "high",
 }
 
 # Integration aliases only: no scoring or normalization is performed here.
@@ -41,6 +44,17 @@ NEGOTIATION_ATTRIBUTE_MAP = {
     "availability_sla_percent": "availability",
     "minimum_vm_price_usd_hour": "price",
     "storage_price_usd_gb_month": "storage",
+    "Availability": "availability",
+    "ResponseTimeMs": "response_time",
+    "LatencyMs": "latency",
+    "CostPerHourUSD": "price",
+    # Canonical mentor-dataset QoS fields; only SLA-meaningful values are
+    # exposed to negotiation (documentation/best practices remain ranking-only).
+    "availability": "availability",
+    "reliability": "reliability",
+    "throughput": "throughput",
+    "response_time": "response_time",
+    "latency": "latency",
 }
 
 
@@ -99,7 +113,7 @@ def collect_user_requirements(
     elif interactive:
         priorities = {}
         print("Enter priority for each attribute: very_low, low, medium, high, very_high")
-        for attribute in DEFAULT_ATTRIBUTE_ORDER:
+        for attribute in processor.validator.supported_attributes:
             priorities[attribute] = input(f"{attribute}: ").strip()
         logger.info("User requirements collected interactively")
     else:
@@ -179,7 +193,7 @@ def run_workflow(
     logger.info("Dataset loaded: %d providers", len(providers))
 
     logger.info("Collecting user requirements")
-    processor = UserRequirementProcessor()
+    processor = UserRequirementProcessor(QOS_CRITERIA)
     requirement = collect_user_requirements(processor, requirements_path, interactive)
     user_sla = collect_user_sla(user_sla_path, interactive)
 
@@ -223,7 +237,7 @@ def build_parser() -> argparse.ArgumentParser:
     """Create the command-line parser for the demonstration workflow."""
 
     parser = argparse.ArgumentParser(description="Run the complete IRNAM research workflow")
-    parser.add_argument("--dataset", type=Path, default=Path("outputs/cloud_dataset.json"))
+    parser.add_argument("--dataset", type=Path, default=Path("src/dataset/cloud_dataset.csv"))
     parser.add_argument("--requirements", type=Path, help="JSON object containing all user priorities")
     parser.add_argument("--user-sla", type=Path, help="JSON object containing user negotiable targets")
     parser.add_argument("--provider-sla", type=Path, help="JSON provider SLA object or provider-keyed object")
@@ -232,6 +246,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--max-rounds", type=int, default=10)
     parser.add_argument("--acceptance-threshold", type=float, default=0.0)
     parser.add_argument("--log-level", choices=("DEBUG", "INFO", "WARNING", "ERROR"), default="INFO")
+    parser.add_argument("--json", action="store_true", help="Emit the legacy JSON workflow payload instead of the terminal demonstration")
+    parser.add_argument("--no-benchmark", action="store_true", help="Skip optional multi-algorithm comparison")
     return parser
 
 
@@ -245,6 +261,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
     )
     try:
+        recommendation_started = perf_counter()
         result = run_workflow(
             dataset_path=args.dataset,
             requirements_path=args.requirements,
@@ -257,7 +274,40 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 acceptance_threshold=args.acceptance_threshold,
             ),
         )
-        print(json.dumps(result.to_dict(), indent=2, sort_keys=True))
+        if args.json:
+            print(json.dumps(result.to_dict(), indent=2, sort_keys=True))
+            return 0
+        reporter = TerminalReporter()
+        reporter.banner()
+        providers = RecommendationEngine(dataset_path=args.dataset).load_dataset()
+        # This is the one shared comparison context: filtered records and the
+        # already-normalized per-requirement scores from the IRNAM run.
+        shared_providers = []
+        for ranked in result.recommendation.complete_ranking:
+            record = dict(ranked.provider_attributes)
+            record.update(ranked.attribute_scores)
+            record["provider_name"] = ranked.provider
+            shared_providers.append(record)
+        reporter.dataset_summary(providers)
+        reporter.requirements(result.requirement.priority_values, result.recommendation.user_weights)
+        reporter.comparison_validation(result.recommendation, shared_providers)
+        reporter.pipeline_status()
+        reporter.ranking(result.recommendation, perf_counter() - recommendation_started)
+        reporter.best(result.recommendation)
+        reporter.negotiation_sla(result)
+        benchmark_rows = []
+        ml_metrics = {}
+        if not args.no_benchmark:
+            benchmark_rows = run_benchmark(shared_providers, result.recommendation.user_weights, {}, Path("outputs"), result.recommendation.complete_ranking, pre_normalized=True)
+            for model_cls in (RandomForestModel, XGBoostModel, LightGBMModel):
+                model = model_cls(target="TrustScore").fit(shared_providers)
+                ml_metrics[model.estimator_name] = model.validate(shared_providers)
+            irnam = next(row for row in benchmark_rows if row["algorithm"] == "IRNAM_Weighted")
+            if irnam["top_provider"] != result.recommendation.recommended_provider:
+                raise RuntimeError("Recommendation consistency validation failed")
+            reporter.comparison(benchmark_rows, ml_metrics)
+        reporter.metrics(result)
+        reporter.save(result, benchmark_rows, ml_metrics, Path("outputs"))
         return 0
     except KeyboardInterrupt:
         logger.warning("Workflow cancelled by user")

@@ -1,0 +1,116 @@
+{
+  "CPUCores": {
+    "min": 2,
+    "max": 64,
+    "mean": 21.25125,
+    "median": 16.0
+  },
+  "RAMGB": {
+    "min": 4,
+    "max": 512,
+    "mean": 97.73416666666667,
+    "median": 64.0
+  },
+  "StorageGB": {
+    "min": 50,
+    "max": 2000,
+    "mean": 646.1666666666666,
+    "median": 500.0
+  },
+  "BandwidthMbps": {
+    "min": 100,
+    "max": 10000,
+    "mean": 5008.3966666666665,
+    "median": 5050.0
+  },
+  "Availability": {
+    "min": 99.607,
+    "max": 99.999,
+    "mean": 99.85948333333333,
+    "median": 99.857
+  },
+  "Reliability": {
+    "min": 99.1,
+    "max": 100,
+    "mean": 99.71835833333333,
+    "median": 99.75
+  },
+  "LatencyMs": {
+    "min": 7.06,
+    "max": 49.16,
+    "mean": 30.144635416666667,
+    "median": 30.65
+  },
+  "ResponseTimeMs": {
+    "min": 13.74,
+    "max": 63.72,
+    "mean": 38.64367708333334,
+    "median": 38.91
+  },
+  "ThroughputMbps": {
+    "min": 100,
+    "max": 9647.32,
+    "mean": 4209.860122916667,
+    "median": 4176.665
+  },
+  "PacketLossPct": {
+    "min": 0,
+    "max": 0.68,
+    "mean": 0.3003370833333333,
+    "median": 0.3015
+  },
+  "SecurityScore": {
+    "min": 82.17,
+    "max": 100,
+    "mean": 92.92758125,
+    "median": 93.23
+  },
+  "ComplianceScore": {
+    "min": 78.44,
+    "max": 100.0,
+    "mean": 90.4174625,
+    "median": 90.63
+  },
+  "SupportScore": {
+    "min": 70.34,
+    "max": 100,
+    "mean": 86.3462375,
+    "median": 85.9
+  },
+  "CostPerHourUSD": {
+    "min": 0.02,
+    "max": 0.1714,
+    "mean": 0.08696916666666667,
+    "median": 0.08565
+  },
+  "ScalabilityScore": {
+    "min": 70.31,
+    "max": 100,
+    "mean": 89.96334791666666,
+    "median": 89.96
+  },
+  "SLAViolationRate": {
+    "min": 0.008,
+    "max": 3.624,
+    "mean": 1.3722791666666667,
+    "median": 1.385
+  },
+  "EnergyEfficiency": {
+    "min": 60.27,
+    "max": 100,
+    "mean": 80.10821041666667,
+    "median": 79.98
+  },
+  "CustomerRating": {
+    "min": 3.53,
+    "max": 5,
+    "mean": 4.260314583333333,
+    "median": 4.25
+  },
+  "TrustScore": {
+    "min": 88.51,
+    "max": 100,
+    "mean": 95.89543125,
+    "median": 95.92
+  }
+}

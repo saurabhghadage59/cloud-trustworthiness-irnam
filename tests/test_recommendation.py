@@ -1,4 +1,5 @@
 import unittest
+from pathlib import Path
 
 from negotiation.utils import provider_name_from_recommendation
 from src.recommendation.models import Requirement, RequirementAttribute, RequirementPriority
@@ -110,6 +111,21 @@ class RecommendationEngineTests(unittest.TestCase):
         result = RecommendationEngine().recommend(parsed)
         self.assertIsNotNone(result.recommended_provider)
         self.assertEqual(5, len(result.complete_ranking))
+
+    def test_mentor_qos_schema_is_adapted_without_legacy_columns(self):
+        """Service-name QoS CSVs remain rankable when optional IRNAM fields are absent."""
+        dataset = Path(__file__).resolve().parents[1] / "src" / "dataset" / "cloud_dataset.csv"
+        engine = RecommendationEngine(dataset_path=dataset)
+        rows = engine.load_dataset()
+        self.assertEqual("MAPPMatching", rows[0]["provider_name"])
+        self.assertTrue({"availability", "reliability", "throughput", "response_time", "latency", "documentation", "best_practices"}.issubset(rows[0]))
+        result = engine.recommend(requirement(
+            availability="very_high", reliability="high", throughput="high", response_time="low",
+            latency="low", documentation="medium", best_practices="high",
+        ))
+        self.assertIsNotNone(result.recommended_provider)
+        self.assertEqual({"availability", "reliability", "throughput", "response_time", "latency", "documentation", "best_practices"}, set(result.user_weights))
+        self.assertEqual(len(result.complete_ranking), len({row.provider for row in result.complete_ranking}))
 
 
 if __name__ == "__main__":

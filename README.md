@@ -1,5 +1,45 @@
 # IRNAM Structured Cloud QoS Dataset Builder
 
+> Research-framework upgrade: the legacy IRNAM workflow remains supported and
+> the canonical large benchmark is `src/dataset/cloud_dataset.csv` (4,800
+> service observations). Use `dataset_builder.build_benchmark_dataset` to
+> produce schema, validation, preprocessing, JSON, and statistics artifacts
+> for that source or any compatible future CSV.
+
+## Research framework quick start
+
+```python
+from dataset_builder import build_benchmark_dataset
+from src.recommendation import RecommendationEngine, UserRequirementProcessor
+from evaluation.benchmark import run_benchmark
+
+build_benchmark_dataset("src/dataset/cloud_dataset.csv", "outputs/research")
+requirements = UserRequirementProcessor().process({
+    "availability": "high", "reliability": "high", "security": "high",
+    "cost": "medium", "response_time": "medium", "scalability": "high",
+    "support": "medium", "storage": "low", "network": "medium",
+})
+result = RecommendationEngine(
+    dataset_path="src/dataset/cloud_dataset.csv", algorithm="TOPSIS",
+    normalization="robust",
+).recommend(requirements)
+```
+
+The strategy factory supports `IRNAM_Weighted` (the unchanged baseline),
+`Weighted Sum`, `TOPSIS`, `AHP`, `VIKOR`, `PROMETHEE II`, `ELECTRE`, `SAW`, and
+`Weighted Product Model`. All share `fit`, `score`, `rank`, `recommend`, and
+`explain` methods. `src/recommendation/ml/` provides portable model façades for
+Random Forest, XGBoost, LightGBM, CatBoost, Gradient Boosting, and Extra Trees,
+including validation, cross-validation, tuning, importance, explanation, and
+persistence. Accelerated implementations remain optional.
+
+The benchmark evaluator writes `comparison.csv`, `evaluation_report.csv`,
+`evaluation_report.json`, `recommendation_results.json`, and a Markdown report.
+It measures ranking quality using Precision@K, Recall@K, F1@K, MAP, MRR, NDCG,
+Spearman, Kendall Tau, execution time, and memory usage. Negotiation confidence
+now documents trust, reliability, support, and customer-rating evidence; SLA
+contracts include a QoS/violation-penalty summary without changing agreed terms.
+
 This repository implements the dataset-building phase of *A User-Priorities-Based Strategy for Three-Phase Intelligent Recommendation and Negotiating Agents for Cloud Services (IRNAM)*. It produces a typed, machine-readable QoS snapshot for AWS, Microsoft Azure, Google Cloud, Oracle Cloud, and IBM Cloud using reviewed public official sources.
 
 The builder does **not** normalize, score, rank, recommend, negotiate, calculate weights, or evaluate SLA compliance. Existing prototype modules outside `dataset_builder/` are not used by this pipeline.

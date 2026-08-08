@@ -73,6 +73,44 @@ class Provider:
     source_url: Optional[str] = None
     source_type: Optional[str] = None
     sources: List[SourceRecord] = field(default_factory=list, repr=False)
+    # Generic QoS aliases are optional so legacy collector/export contracts are
+    # unchanged while schema-adapted research datasets remain representable.
+    availability: Optional[float] = None
+    reliability: Optional[float] = None
+    throughput: Optional[float] = None
+    response_time: Optional[float] = None
+    latency: Optional[float] = None
+    documentation_score: Optional[float] = None
+    best_practice_score: Optional[float] = None
+    wsdl_address: Optional[str] = None
+
+    @classmethod
+    def from_qos_row(cls, row: Dict[str, Any]) -> "Provider":
+        """Create a provider model from any row accepted by the shared schema adapter.
+
+        This is intentionally additive: the legacy collector still supplies
+        provenance-rich fields, while external QoS files can carry their
+        canonical metrics into future BWM/TOPSIS processing.
+        """
+        from src.dataset.schema_mapping import adapt_row
+        values = adapt_row(row)
+        provider_name = str(values.get("provider_name") or "").strip()
+        if not provider_name:
+            raise ValueError("Provider Name, Provider, or Service Name is required")
+        return cls(
+            provider_name=provider_name,
+            availability=values.get("availability"), reliability=values.get("reliability"),
+            throughput=values.get("throughput"), response_time=values.get("response_time"),
+            latency=values.get("latency"), documentation_score=values.get("documentation_score"),
+            best_practice_score=values.get("best_practice_score"), wsdl_address=values.get("wsdl_address"),
+        )
+
+    def as_qos_dict(self) -> Dict[str, Any]:
+        """Return generic QoS metrics without altering the legacy exporter schema."""
+        return {name: getattr(self, name) for name in (
+            "provider_name", "availability", "reliability", "throughput", "response_time", "latency",
+            "documentation_score", "best_practice_score", "wsdl_address",
+        )}
 
     def as_dict(self) -> Dict[str, Any]:
         return {name: getattr(self, name) for name in ATTRIBUTE_FIELDS}

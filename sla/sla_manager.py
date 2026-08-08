@@ -44,6 +44,7 @@ class SLAManager:
             agreement_status=status,
             metadata={
                 "reason": negotiation_result.reason,
+                "sla_terms": self._recommended_sla_terms(negotiation_result.recommendation),
                 **dict(metadata or {}),
             },
         )
@@ -52,6 +53,29 @@ class SLAManager:
             raise ValueError("; ".join(validation.errors))
         logger.info("SLA Generated for provider %s", contract.provider)
         return contract
+
+    @staticmethod
+    def _recommended_sla_terms(recommendation: Mapping[str, Any]) -> Dict[str, Any]:
+        """Carry benchmark QoS into an SLA summary without changing offers.
+
+        This is intentionally metadata rather than a negotiated commitment: it
+        preserves the original negotiation contract while documenting the
+        measurable terms and an auditable violation-penalty basis.
+        """
+        attributes = recommendation.get("provider_attributes", {}) if recommendation else {}
+        aliases = {
+            "availability": ("Availability", "availability_sla_percent"), "response_time": ("ResponseTimeMs",),
+            "latency": ("LatencyMs",), "support": ("SupportScore", "support_tier"),
+            "scalability": ("ScalabilityScore",), "security": ("SecurityScore",),
+            "reliability": ("Reliability",), "sla_violation_rate": ("SLAViolationRate",),
+        }
+        terms = {name: next((attributes[key] for key in keys if key in attributes), None) for name, keys in aliases.items()}
+        violation_rate = terms.get("sla_violation_rate")
+        terms["violation_penalty_policy"] = {
+            "basis": "SLA violation rate", "rate_percent": violation_rate,
+            "calculation": "service_credit = agreed_monthly_charge * violation_rate / 100",
+        }
+        return terms
 
     def parse_contract(self, source) -> SLAContract:
         return SLAContract.from_dict(self.parser.parse(source))
