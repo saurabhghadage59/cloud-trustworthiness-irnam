@@ -7,6 +7,7 @@ from .user_input import UserRequirementProcessor
 from .weights import WeightCalculator
 from .normalization import Normalizer, normalize
 from .algorithms import RecommendationStrategy, create_strategy
+from .m_topsis import MultiLayeredTOPSISStrategy
 
 __all__ = [
     "ProviderRanker",
@@ -23,4 +24,5 @@ __all__ = [
     "normalize",
     "RecommendationStrategy",
     "create_strategy",
+    "MultiLayeredTOPSISStrategy",
 ]

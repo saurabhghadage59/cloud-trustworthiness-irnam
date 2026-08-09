@@ -15,6 +15,7 @@ class FrameworkConfig:
     algorithm: str = "IRNAM_Weighted"
     benefit_attributes: tuple[str, ...] = ("Availability", "Reliability", "ThroughputMbps", "SecurityScore", "ComplianceScore", "SupportScore", "ScalabilityScore", "EnergyEfficiency", "CustomerRating", "TrustScore")
     cost_attributes: tuple[str, ...] = ("LatencyMs", "ResponseTimeMs", "PacketLossPct", "CostPerHourUSD", "SLAViolationRate")
+    category_weights: Mapping[str, float] = field(default_factory=lambda: {"economic": 0.25, "performance": 0.35, "security_trust": 0.25, "service_quality": 0.15})
     ml_parameters: Mapping[str, object] = field(default_factory=dict)
 
 DEFAULT_CONFIG = FrameworkConfig()

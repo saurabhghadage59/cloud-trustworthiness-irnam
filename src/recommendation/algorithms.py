@@ -7,6 +7,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from math import prod, sqrt
 from typing import Any, Mapping, Sequence
+from .m_topsis import M_TOPSIS_ALIASES, MultiLayeredTOPSISStrategy
 from .normalization import Normalizer
 from .ranking import RankedProvider
 
@@ -65,7 +66,8 @@ class AHPStrategy(WeightedSumStrategy): name="AHP"
 class PROMETHEEIIIStrategy(WeightedSumStrategy): name="PROMETHEE II"
 class ELECTREStrategy(WeightedSumStrategy): name="ELECTRE"
 
-STRATEGIES={c.name.casefold():c for c in (IRNAMWeightedStrategy,WeightedSumStrategy,SAWStrategy,WeightedProductStrategy,TOPSISStrategy,VIKORStrategy,AHPStrategy,PROMETHEEIIIStrategy,ELECTREStrategy)}
+STRATEGIES={c.name.casefold():c for c in (IRNAMWeightedStrategy,WeightedSumStrategy,SAWStrategy,WeightedProductStrategy,TOPSISStrategy,VIKORStrategy,AHPStrategy,PROMETHEEIIIStrategy,ELECTREStrategy,MultiLayeredTOPSISStrategy)}
+for alias in M_TOPSIS_ALIASES: STRATEGIES[alias]=MultiLayeredTOPSISStrategy
 def create_strategy(name: str, **kwargs):
     try:return STRATEGIES[name.casefold()](**kwargs)
     except KeyError: raise ValueError(f"Unsupported algorithm {name}; choose one of {', '.join(sorted(STRATEGIES))}")
@@ -81,3 +83,4 @@ PROMETHEEII = PROMETHEEIIIStrategy
 ELECTRE = ELECTREStrategy
 SAW = SAWStrategy
 WeightedProductModel = WeightedProductStrategy
+MTOPSIS = MultiLayeredTOPSISStrategy

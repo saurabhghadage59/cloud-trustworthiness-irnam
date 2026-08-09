@@ -8,7 +8,7 @@ from .research_metrics import *
 def run_benchmark(providers:Sequence[Mapping[str,Any]], weights:Mapping[str,float], directions:Mapping[str,str], output_dir:Path|str, baseline_ranking: Sequence[RankedProvider] | None = None, pre_normalized: bool = False):
     output=Path(output_dir);output.mkdir(parents=True,exist_ok=True); rows=[]; results={}
     if not providers: raise ValueError("Benchmark requires at least one filtered provider")
-    for name in ("IRNAM_Weighted","TOPSIS","AHP","VIKOR","PROMETHEE II","ELECTRE","SAW","Weighted Product Model"):
+    for name in ("IRNAM_Weighted","M-TOPSIS","TOPSIS","AHP","VIKOR","PROMETHEE II","ELECTRE","SAW","Weighted Product Model"):
         tracemalloc.start();started=time.perf_counter()
         ranking = list(baseline_ranking) if name == "IRNAM_Weighted" and baseline_ranking is not None else create_strategy(name, pre_normalized=pre_normalized).fit(providers,weights,directions).rank()
         current,peak=tracemalloc.get_traced_memory();tracemalloc.stop()

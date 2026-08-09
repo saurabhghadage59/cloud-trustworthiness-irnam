@@ -3,8 +3,17 @@
     "algorithm": "IRNAM_Weighted",
     "top_provider": "dConverterSOAP",
     "top_score": 0.74945991265,
-    "execution_seconds": 0.005256599994027056,
-    "memory_bytes": 13208,
+    "execution_seconds": 0.008813399996142834,
+    "memory_bytes": 13200,
+    "rank": 1,
+    "provider_count": 1643
+  },
+  {
+    "algorithm": "M-TOPSIS",
+    "top_provider": "dConverterSOAP",
+    "top_score": 0.762618230264,
+    "execution_seconds": 0.2505738000036217,
+    "memory_bytes": 3222323,
     "rank": 1,
     "provider_count": 1643
   },
@@ -12,8 +21,8 @@
     "algorithm": "TOPSIS",
     "top_provider": "dConverterSOAP",
     "top_score": 0.695904436185,
-    "execution_seconds": 0.08701759998803027,
-    "memory_bytes": 2569503,
+    "execution_seconds": 0.15511030005291104,
+    "memory_bytes": 3273786,
     "rank": 1,
     "provider_count": 1643
   },
@@ -21,8 +30,8 @@
     "algorithm": "AHP",
     "top_provider": "dConverterSOAP",
     "top_score": 0.74945991265,
-    "execution_seconds": 0.033686300012050197,
-    "memory_bytes": 2478807,
+    "execution_seconds": 0.08213720005005598,
+    "memory_bytes": 3258025,
     "rank": 1,
     "provider_count": 1643
   },
@@ -30,8 +39,8 @@
     "algorithm": "VIKOR",
     "top_provider": "RetHeaderService",
     "top_score": 0.907956273826,
-    "execution_seconds": 0.19338690000586212,
-    "memory_bytes": 2481063,
+    "execution_seconds": 0.4496897999779321,
+    "memory_bytes": 3261301,
     "rank": 1,
     "provider_count": 1643
   },
@@ -39,8 +48,8 @@
     "algorithm": "PROMETHEE II",
     "top_provider": "dConverterSOAP",
     "top_score": 0.74945991265,
-    "execution_seconds": 0.03967850000481121,
-    "memory_bytes": 2478791,
+    "execution_seconds": 0.09371449996251613,
+    "memory_bytes": 3256619,
     "rank": 1,
     "provider_count": 1643
   },
@@ -48,8 +57,8 @@
     "algorithm": "ELECTRE",
     "top_provider": "dConverterSOAP",
     "top_score": 0.74945991265,
-    "execution_seconds": 0.03187550000438932,
-    "memory_bytes": 2570839,
+    "execution_seconds": 0.05294470000080764,
+    "memory_bytes": 3256451,
     "rank": 1,
     "provider_count": 1643
   },
@@ -57,8 +66,8 @@
     "algorithm": "SAW",
     "top_provider": "dConverterSOAP",
     "top_score": 0.74945991265,
-    "execution_seconds": 0.029945800008135848,
-    "memory_bytes": 2478655,
+    "execution_seconds": 0.04902629996649921,
+    "memory_bytes": 3256619,
     "rank": 1,
     "provider_count": 1643
   },
@@ -66,8 +75,8 @@
     "algorithm": "Weighted Product Model",
     "top_provider": "RetHeaderService",
     "top_score": 0.553093686444,
-    "execution_seconds": 0.03252369999245275,
-    "memory_bytes": 2478783,
+    "execution_seconds": 0.09689500002423301,
+    "memory_bytes": 3258116,
     "rank": 1,
     "provider_count": 1643
   }

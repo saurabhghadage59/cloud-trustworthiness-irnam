@@ -15,6 +15,7 @@ from .models import Requirement
 from .ranking import ProviderRanker, RankedProvider
 from .weights import WeightCalculator
 from .algorithms import create_strategy
+from .m_topsis import M_TOPSIS_ALIASES
 from src.dataset.schema_mapping import adapt_row
 from src.dataset.qos_preprocessing import QOS_CRITERIA, is_mentor_qos_schema, preprocess_qos_rows
 
@@ -119,6 +120,8 @@ class RecommendationEngine:
         enum_scales: Optional[Mapping[str, Mapping[Any, float]]] = None,
         algorithm: str = "IRNAM_Weighted",
         normalization: str = "minmax",
+        category_mapping: Optional[Mapping[str, Sequence[str]]] = None,
+        category_weights: Optional[Mapping[str, float]] = None,
     ) -> None:
         self.dataset_path = Path(dataset_path) if dataset_path else Path(__file__).resolve().parents[2] / "outputs" / "cloud_dataset.json"
         self._providers = [dict(provider) for provider in providers] if providers is not None else None
@@ -128,6 +131,8 @@ class RecommendationEngine:
         self.enum_scales = {name: dict(scale) for name, scale in (enum_scales or DEFAULT_ENUM_SCALES).items()}
         self.algorithm = algorithm
         self.normalization = normalization
+        self.category_mapping = dict(category_mapping or {})
+        self.category_weights = dict(category_weights or {})
         self.weight_calculator = WeightCalculator()
         self.ranker = ProviderRanker()
 
@@ -181,8 +186,23 @@ class RecommendationEngine:
         logger.info("Weights Generated: %d active attributes (%d skipped)", len(user_weights), len(skipped))
         mapped_fields = self._mapped_provider_fields(user_weights, active_mapping)
         provider_weights = self.weight_calculator.calculate_provider_weights(valid, mapped_fields, self.enum_scales)
+        result_weights = user_weights
+        explanation_weights = user_weights
         if self.algorithm.casefold() in {"irnam_weighted", "irnam", "weighted sum", "weighted_sum"}:
             ranking = self.ranker.rank_providers(valid, user_weights, active_mapping, self.directions, self.enum_scales)
+        elif self.algorithm.casefold() in M_TOPSIS_ALIASES:
+            field_weights, field_directions = self._m_topsis_fields(user_weights, active_mapping, valid)
+            if not field_weights:
+                raise ValueError("No concrete dataset attributes are available for M-TOPSIS ranking.")
+            strategy = create_strategy(
+                self.algorithm,
+                category_mapping=self.category_mapping or None,
+                category_weights=self.category_weights or None,
+                enum_scales=self.enum_scales,
+            ).fit(valid, field_weights, field_directions)
+            ranking = strategy.rank()
+            result_weights = field_weights
+            explanation_weights = field_weights
         else:
             # Strategy algorithms operate on already-resolved scalar fields.
             scalar = {attribute: fields[0][0] for attribute, fields in ((a, self.ranker._mapping_fields(s)) for a, s in active_mapping.items()) if fields}
@@ -191,14 +211,14 @@ class RecommendationEngine:
         logger.info("Ranking Completed: %d providers", len(ranking))
 
         best = ranking[0]
-        reason = self.generate_explanation(best, ranking, user_weights)
+        reason = self.generate_explanation(best, ranking, explanation_weights)
         result = RecommendationResult(
             recommended_provider=best.provider,
             overall_score=best.overall_score,
             complete_ranking=ranking,
             attribute_scores=dict(best.attribute_scores),
             reason_for_recommendation=reason,
-            user_weights=user_weights,
+            user_weights=result_weights,
             provider_weights=provider_weights,
             provider_attributes=dict(best.provider_attributes),
             filtered_out=filtered_out,
@@ -306,6 +326,33 @@ class RecommendationEngine:
         for attribute in user_weights:
             fields.extend(name for name, _ in self.ranker._mapping_fields((mapping or self.attribute_mapping).get(attribute, attribute)))
         return list(dict.fromkeys(fields))
+
+    def _m_topsis_fields(
+        self,
+        user_weights: Mapping[str, float],
+        mapping: Mapping[str, Any],
+        providers: Sequence[Mapping[str, Any]],
+    ) -> tuple[Dict[str, float], Dict[str, str]]:
+        """Expand user attributes into weighted concrete dataset fields."""
+
+        weights: Dict[str, float] = {}
+        directions: Dict[str, str] = {}
+        for user_attribute, user_weight in user_weights.items():
+            fields = [
+                (field, coefficient)
+                for field, coefficient in self.ranker._mapping_fields(mapping.get(user_attribute, user_attribute))
+                if any(provider.get(field) is not None for provider in providers)
+            ]
+            coefficient_total = sum(coefficient for _, coefficient in fields)
+            if coefficient_total <= 0:
+                continue
+            for field, coefficient in fields:
+                weights[field] = weights.get(field, 0.0) + float(user_weight) * (coefficient / coefficient_total)
+                directions[field] = self.directions.get(field, self.directions.get(user_attribute, "higher"))
+        total = sum(weights.values())
+        if total > 0:
+            weights = {field: weight / total for field, weight in weights.items()}
+        return weights, directions
 
     def _resolve_mapping(self, user_weights: Mapping[str, float], providers: Sequence[Mapping[str, Any]]) -> Dict[str, Any]:
         """Use configured aliases when present and infer benchmark columns otherwise."""

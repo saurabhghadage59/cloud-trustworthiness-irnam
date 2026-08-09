@@ -3,6 +3,7 @@ from pathlib import Path
 
 from negotiation.utils import provider_name_from_recommendation
 from src.recommendation.models import Requirement, RequirementAttribute, RequirementPriority
+from src.recommendation.m_topsis import MultiLayeredTOPSISStrategy
 from src.recommendation.ranking import ProviderRanker
 from src.recommendation.recommendation_engine import RecommendationEngine
 from src.recommendation.user_input import UserRequirementProcessor
@@ -62,6 +63,56 @@ class RankingTests(unittest.TestCase):
         self.assertEqual(0.0, ranking[1].attribute_scores["quality"])
 
 
+class MultiLayeredTOPSISTests(unittest.TestCase):
+    def test_category_ranking_uses_category_local_topsis_score(self):
+        providers = [
+            {"provider_name": "A", "throughput": 100, "latency": 10},
+            {"provider_name": "B", "throughput": 50, "latency": 20},
+            {"provider_name": "C", "throughput": 10, "latency": 40},
+        ]
+        strategy = MultiLayeredTOPSISStrategy(
+            category_mapping={"performance": ("throughput", "latency")},
+            category_weights={"performance": 1.0},
+        ).fit(providers, {"throughput": 0.7, "latency": 0.3}, {"latency": "lower"})
+
+        ranking = strategy.rank_category("performance")
+        self.assertEqual("A", ranking[0].provider)
+        self.assertGreater(ranking[0].overall_score, ranking[-1].overall_score)
+
+    def test_cost_criteria_make_lower_values_closer_to_ideal(self):
+        providers = [
+            {"provider_name": "Cheap", "cost": 1.0},
+            {"provider_name": "Expensive", "cost": 5.0},
+        ]
+        ranking = MultiLayeredTOPSISStrategy(
+            category_mapping={"economic": ("cost",)},
+            category_weights={"economic": 1.0},
+        ).fit(providers, {"cost": 1.0}, {"cost": "lower"}).rank()
+
+        self.assertEqual("Cheap", ranking[0].provider)
+        self.assertGreater(ranking[0].overall_score, ranking[1].overall_score)
+
+    def test_configured_category_weights_are_normalized_and_change_winner(self):
+        providers = [
+            {"provider_name": "Fast", "throughput": 100, "cost": 10},
+            {"provider_name": "Cheap", "throughput": 50, "cost": 1},
+        ]
+        category_mapping = {"performance": ("throughput",), "economic": ("cost",)}
+
+        performance_first = MultiLayeredTOPSISStrategy(
+            category_mapping=category_mapping,
+            category_weights={"performance": 8, "economic": 2},
+        ).fit(providers, {"throughput": 0.5, "cost": 0.5}, {"cost": "lower"})
+        economic_first = MultiLayeredTOPSISStrategy(
+            category_mapping=category_mapping,
+            category_weights={"performance": 2, "economic": 8},
+        ).fit(providers, {"throughput": 0.5, "cost": 0.5}, {"cost": "lower"})
+
+        self.assertAlmostEqual(1.0, sum(performance_first.category_weights.values()))
+        self.assertEqual("Fast", performance_first.rank()[0].provider)
+        self.assertEqual("Cheap", economic_first.rank()[0].provider)
+
+
 class RecommendationEngineTests(unittest.TestCase):
     def setUp(self):
         self.providers = [
@@ -82,6 +133,44 @@ class RecommendationEngineTests(unittest.TestCase):
         self.assertEqual(3, len(result.complete_ranking))
         self.assertTrue(result.attribute_scores)
         self.assertIn("best overall evaluation score", result.reason_for_recommendation)
+
+    def test_m_topsis_integration_returns_negotiation_ready_result(self):
+        engine = RecommendationEngine(
+            providers=self.providers,
+            attribute_mapping={"quality": "quality", "price": "price"},
+            directions={"price": "lower"},
+            algorithm="mtopsis",
+            category_mapping={"performance": ("quality",), "economic": ("price",)},
+            category_weights={"performance": 8, "economic": 2},
+        )
+        result = engine.recommend(self.requirement)
+
+        self.assertEqual("Beta", result.recommended_provider)
+        self.assertEqual("Beta", provider_name_from_recommendation(result))
+        self.assertTrue(all(isinstance(entry.provider_attributes, dict) for entry in result.complete_ranking))
+
+    def test_m_topsis_hyphen_alias_is_supported(self):
+        engine = RecommendationEngine(
+            providers=self.providers,
+            attribute_mapping={"quality": "quality", "price": "price"},
+            directions={"price": "lower"},
+            algorithm="m-topsis",
+            category_mapping={"performance": ("quality",), "economic": ("price",)},
+            category_weights={"performance": 8, "economic": 2},
+        )
+        self.assertEqual("Beta", engine.recommend(self.requirement).recommended_provider)
+
+    def test_irnam_weighted_baseline_regression_is_preserved(self):
+        engine = RecommendationEngine(
+            providers=self.providers,
+            attribute_mapping={"quality": "quality", "price": "price"},
+            directions={"price": "lower"},
+            algorithm="IRNAM_Weighted",
+        )
+        result = engine.recommend(self.requirement)
+
+        self.assertEqual("Beta", result.recommended_provider)
+        self.assertAlmostEqual(0.714285714286, result.overall_score)
 
     def test_filtering_handles_services_constraints_and_unavailable_providers(self):
         result = self.engine.recommend(
